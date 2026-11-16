@@ -76,6 +76,12 @@ import dev.chrisbanes.haze.hazeChild
 fun Modifier.glass(shape: Shape): Modifier = composed {
     val t = LocalWTokens.current
     val c = t.colors
+    // Haze 1.1.1 forbids hazeChild inside the haze source (HazeChildNode.kt:277,
+    // require(!state.contentDrawing)). Inside the NavHost (the source), draw the same opaque
+    // fallback glass colour instead; real blur is used only by siblings such as the bottom bar.
+    if (LocalInsideHazeSource.current) {
+        return@composed this.clip(shape).background(c.glassFallback).border(1.dp, c.glassHairline, shape)
+    }
     val state = LocalHazeState.current
     this
         .clip(shape)
@@ -89,6 +95,9 @@ fun Modifier.glass(shape: Shape): Modifier = composed {
         }
         .border(1.dp, c.glassHairline, shape)
 }
+
+/** True for content drawn inside the Modifier.haze source (the screens in the NavHost). */
+val LocalInsideHazeSource = androidx.compose.runtime.staticCompositionLocalOf { false }
 
 /** 2 dp accent focus ring at 2 dp offset, shown only for keyboard/D-pad focus. */
 fun Modifier.wdFocusRing(interaction: MutableInteractionSource, shape: Shape): Modifier = composed {

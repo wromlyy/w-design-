@@ -46,6 +46,7 @@ import com.wdesign.core.model.DesignSource
 import com.wdesign.ds.BarItem
 import com.wdesign.ds.GlassBottomBar
 import com.wdesign.ds.LocalHazeState
+import com.wdesign.ds.LocalInsideHazeSource
 import com.wdesign.ds.LocalSnackbar
 import com.wdesign.ds.Routes
 import com.wdesign.ds.W
@@ -137,29 +138,31 @@ private fun AppShell(intent: Intent?, consumed: () -> Unit) {
 
     CompositionLocalProvider(LocalHazeState provides hazeState, LocalSnackbar provides snackbar) {
         Box(Modifier.fillMaxSize().background(W.colors.surface)) {
-            NavHost(
-                nav, startDestination = Routes.HOME,
-                modifier = Modifier.fillMaxSize().haze(hazeState),
-                enterTransition = { if (reduceMotion) fadeIn(tween(150)) else fadeIn(tween(280, easing = Emphasized)) + slideInVertically(tween(280, easing = Emphasized)) { rise } },
-                exitTransition = { fadeOut(tween(if (reduceMotion) 150 else 200)) },
-                popEnterTransition = { fadeIn(tween(if (reduceMotion) 150 else 280)) },
-                popExitTransition = { fadeOut(tween(if (reduceMotion) 150 else 200)) },
-            ) {
-                composable(Routes.HOME) { HomeScreen(go) }
-                composable(Routes.DISCOVER) { DiscoverScreen(go) }
-                composable(Routes.CREATE) { CreateScreen(go) }
-                composable(Routes.DESIGNS) { DesignsScreen(go, snackbar) }
-                composable(Routes.SETTINGS) { SettingsScreen(go, snackbar) }
-                composable(Routes.XIAOMI_LAB) { XiaomiLabScreen(go, back, snackbar) }
-                composable(Routes.IMPORT) { ImportScreen(go, back, snackbar) }
-                composable(Routes.PRESET, arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
-                    PresetDetailScreen(e.arguments?.getString("id").orEmpty(), go, back, snackbar)
-                }
-                composable("lockscreen?project={project}", arguments = listOf(navArgument("project") { type = NavType.StringType; nullable = true; defaultValue = null })) { e ->
-                    LockScreenStudio(e.arguments?.getString("project"), go, back, snackbar)
-                }
-                composable("mtz?project={project}", arguments = listOf(navArgument("project") { type = NavType.StringType; nullable = true; defaultValue = null })) { e ->
-                    MtzExportScreen(e.arguments?.getString("project"), go, back, snackbar)
+            CompositionLocalProvider(LocalInsideHazeSource provides true) {
+                NavHost(
+                    nav, startDestination = Routes.HOME,
+                    modifier = Modifier.fillMaxSize().haze(hazeState),
+                    enterTransition = { if (reduceMotion) fadeIn(tween(150)) else fadeIn(tween(280, easing = Emphasized)) + slideInVertically(tween(280, easing = Emphasized)) { rise } },
+                    exitTransition = { fadeOut(tween(if (reduceMotion) 150 else 200)) },
+                    popEnterTransition = { fadeIn(tween(if (reduceMotion) 150 else 280)) },
+                    popExitTransition = { fadeOut(tween(if (reduceMotion) 150 else 200)) },
+                ) {
+                    composable(Routes.HOME) { HomeScreen(go) }
+                    composable(Routes.DISCOVER) { DiscoverScreen(go) }
+                    composable(Routes.CREATE) { CreateScreen(go) }
+                    composable(Routes.DESIGNS) { DesignsScreen(go, snackbar) }
+                    composable(Routes.SETTINGS) { SettingsScreen(go, snackbar) }
+                    composable(Routes.XIAOMI_LAB) { XiaomiLabScreen(go, back, snackbar) }
+                    composable(Routes.IMPORT) { ImportScreen(go, back, snackbar) }
+                    composable(Routes.PRESET, arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
+                        PresetDetailScreen(e.arguments?.getString("id").orEmpty(), go, back, snackbar)
+                    }
+                    composable("lockscreen?project={project}", arguments = listOf(navArgument("project") { type = NavType.StringType; nullable = true; defaultValue = null })) { e ->
+                        LockScreenStudio(e.arguments?.getString("project"), go, back, snackbar)
+                    }
+                    composable("mtz?project={project}", arguments = listOf(navArgument("project") { type = NavType.StringType; nullable = true; defaultValue = null })) { e ->
+                        MtzExportScreen(e.arguments?.getString("project"), go, back, snackbar)
+                    }
                 }
             }
             val route = currentRoute?.substringBefore('?')

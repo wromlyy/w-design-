@@ -38,4 +38,7 @@ Feature modules planned but not yet in `settings.gradle.kts`: editor-kit, theme-
   the shape overload is `@Deprecated`. `HazeDefaults.blurEnabled()` is true only on **API ≥ 32**, so `fallbackTint` is always set.
   **`backgroundColor` is mandatory**: `HazeChildNode.kt:327` does `require(bg.isSpecified)` on every draw (resolved scope → style →
   `LocalHazeStyle`). Leaving it unset crashed every screen with the glass bar in CI run 43866896015. `glass()` now sets the opaque surface colour.
+  **`hazeChild` may not be a descendant of `Modifier.haze`** (`HazeChildNode.kt:277`, `require(!state.contentDrawing)`): top bars inside the
+  NavHost (the haze source) crashed in CI run 43898142925. Inside the source, `glass()` now draws the opaque fallback glass colour; only
+  siblings of the NavHost (the bottom bar) blur.
 * MTZ / MAML facts and sources: see docs/MTZ.md.
