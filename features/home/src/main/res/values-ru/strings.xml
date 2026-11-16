@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hm_title">W Design</string>
+    <string name="hm_subtitle">Ваш текущий дизайн</string>
+    <string name="hm_starter">Стартовая тема</string>
+    <string name="hm_home">Рабочий стол</string>
+    <string name="hm_lock">Блокировка</string>
+    <string name="hm_apply">Поставить обои</string>
+    <string name="hm_apply_home">Рабочий стол</string>
+    <string name="hm_apply_lock">Блокировка</string>
+    <string name="hm_apply_both">Оба</string>
+    <string name="hm_applied">Обои применены.</string>
+    <string name="hm_edit_lock">Редактировать блокировку</string>
+    <string name="hm_export">Экспорт MTZ</string>
+    <string name="hm_continue">Продолжить работу</string>
+    <string name="hm_tools">Инструменты</string>
+    <string name="hm_support">На этом устройстве</string>
+    <string name="hm_support_open">Xiaomi Lab</string>
+    <string name="t_lock">Студия блокировки</string>
+    <string name="t_lock_body">Часы, дата, стекло и декор с честным применением</string>
+    <string name="t_discover">Каталог</string>
+    <string name="t_discover_body">24 готовых дизайна для старта</string>
+    <string name="t_mtz">Экспорт MTZ</string>
+    <string name="t_mtz_body">Соберите тему HyperOS прямо на телефоне</string>
+    <string name="t_import">Импорт</string>
+    <string name="t_import_body">.wdesign, .mtz, .zip с картинками или резервная копия</string>
+    <string name="t_lab">Xiaomi Lab</string>
+    <string name="t_lab_body">Что работает на этом телефоне и почему</string>
+    <string name="t_designs">Мои дизайны</string>
+    <string name="t_designs_body">Всё, что вы сохранили</string>
+    <string name="cr_title">Создать</string>
+    <string name="cr_body">Все инструменты здесь уже работают. Студии темы, виджетов, иконок и живых обоев в разработке и появятся, когда заработают.</string>
+    <string name="cr_new_lock">Новый экран блокировки</string>
+    <string name="cr_new_lock_body">Начните с шаблона и настройте часы, дату и стекло</string>
+    <string name="cr_from_preset">Начать с готового дизайна</string>
+    <string name="cr_from_preset_body">Выберите дизайн в каталоге и сохраните копию</string>
+    <string name="cr_new_name">Новый экран блокировки</string>
+</resources>

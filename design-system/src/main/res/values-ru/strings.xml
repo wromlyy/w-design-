@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_back">Назад</string>
+    <string name="ds_cancel">Отмена</string>
+    <string name="ds_ok">ОК</string>
+    <string name="ds_close">Закрыть</string>
+    <string name="ds_save">Сохранить</string>
+    <string name="ds_undo">Отменить</string>
+    <string name="ds_redo">Повторить</string>
+    <string name="ds_status_supported">Работает</string>
+    <string name="ds_status_partial">Частично</string>
+    <string name="ds_status_action">Нужно действие</string>
+    <string name="ds_status_unsupported">Невозможно</string>
+    <string name="ds_unofficial">Неофициальный MTZ — не проверен и не подписан Xiaomi</string>
+    <string name="ds_preview_home">Предпросмотр рабочего стола</string>
+    <string name="ds_preview_lock">Предпросмотр экрана блокировки</string>
+    <string name="ds_error_generic">Что-то пошло не так: %1$s</string>
+</resources>

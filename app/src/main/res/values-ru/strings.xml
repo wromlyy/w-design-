@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">W Design</string>
+    <string name="tab_home">Главная</string>
+    <string name="tab_discover">Каталог</string>
+    <string name="tab_create">Создать</string>
+    <string name="tab_designs">Мои дизайны</string>
+    <string name="tab_settings">Настройки</string>
+    <string name="link_imported">Открыта ссылка на дизайн: %1$s</string>
+    <string name="link_invalid">Ссылка на дизайн повреждена и не открывается.</string>
+</resources>

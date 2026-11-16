@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">W Design</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_discover">Discover</string>
+    <string name="tab_create">Create</string>
+    <string name="tab_designs">My Designs</string>
+    <string name="tab_settings">Settings</string>
+    <string name="link_imported">Design link opened: %1$s</string>
+    <string name="link_invalid">This design link is damaged and could not be opened.</string>
+</resources>
