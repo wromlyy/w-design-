@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dc_title">Discover</string>
+    <string name="dc_all">All</string>
+    <string name="dc_c_LIQUID_GLASS">Liquid Glass</string>
+    <string name="dc_c_IOS_STYLE">iOS Style</string>
+    <string name="dc_c_MINIMAL">Minimal</string>
+    <string name="dc_c_AMOLED">AMOLED</string>
+    <string name="dc_c_DARK">Dark</string>
+    <string name="dc_c_LIGHT">Light</string>
+    <string name="dc_c_NOTHING_STYLE">Nothing Style</string>
+    <string name="dc_c_HYPEROS">HyperOS</string>
+    <string name="dc_c_ABSTRACT">Abstract</string>
+    <string name="dc_c_CUSTOM">Custom</string>
+    <string name="dc_save">Save to My Designs</string>
+    <string name="dc_saved">Saved to My Designs.</string>
+    <string name="dc_apply">Set as wallpaper</string>
+    <string name="dc_applied">Wallpaper applied.</string>
+    <string name="dc_edit">Edit lock screen</string>
+    <string name="dc_export">Export MTZ</string>
+    <string name="dc_palette">Palette</string>
+    <string name="dc_not_found">This preset no longer exists.</string>
+</resources>

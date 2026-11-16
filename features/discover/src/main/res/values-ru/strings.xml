@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dc_title">Каталог</string>
+    <string name="dc_all">Все</string>
+    <string name="dc_c_LIQUID_GLASS">Жидкое стекло</string>
+    <string name="dc_c_IOS_STYLE">В стиле iOS</string>
+    <string name="dc_c_MINIMAL">Минимализм</string>
+    <string name="dc_c_AMOLED">AMOLED</string>
+    <string name="dc_c_DARK">Тёмные</string>
+    <string name="dc_c_LIGHT">Светлые</string>
+    <string name="dc_c_NOTHING_STYLE">В стиле Nothing</string>
+    <string name="dc_c_HYPEROS">HyperOS</string>
+    <string name="dc_c_ABSTRACT">Абстракция</string>
+    <string name="dc_c_CUSTOM">Свои</string>
+    <string name="dc_save">Сохранить в мои дизайны</string>
+    <string name="dc_saved">Сохранено в «Мои дизайны».</string>
+    <string name="dc_apply">Поставить обои</string>
+    <string name="dc_applied">Обои применены.</string>
+    <string name="dc_edit">Редактировать блокировку</string>
+    <string name="dc_export">Экспорт MTZ</string>
+    <string name="dc_palette">Палитра</string>
+    <string name="dc_not_found">Этого дизайна больше нет.</string>
+</resources>

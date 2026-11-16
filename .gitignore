@@ -1,0 +1,25 @@
+# Build output
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Signing material - never commit
+*.jks
+*.keystore
+*.p12
+keystore.properties
+signing.properties
+
+# APKs: only the published root W-Design.apk is tracked
+*.apk
+*.aab
+!/W-Design.apk
+
+# Local Gradle build cache
+.gradle-build-cache/

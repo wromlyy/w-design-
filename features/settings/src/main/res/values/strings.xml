@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_title">Settings</string>
+    <string name="st_theme">Appearance</string>
+    <string name="st_dark">Dark</string>
+    <string name="st_light">Light</string>
+    <string name="st_system">System</string>
+    <string name="st_motion">Reduce motion</string>
+    <string name="st_transparency">Reduce transparency</string>
+    <string name="st_integrity">Check my designs</string>
+    <string name="st_integrity_ok">Checked %1$d designs, %2$d with missing files.</string>
+    <string name="st_lab">Xiaomi Lab</string>
+    <string name="st_licences">Licences</string>
+    <string name="st_licences_body">Onest and JetBrains Mono (SIL OFL 1.1), Haze (Apache 2.0), AndroidX and Kotlin (Apache 2.0). Icons are W Design\'s own.</string>
+    <string name="st_about">About</string>
+    <string name="st_about_body">W Design 1.0.0. Works offline. MTZ packages are unofficial and not verified or signed by Xiaomi.</string>
+</resources>

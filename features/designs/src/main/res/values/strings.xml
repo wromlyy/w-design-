@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dz_title">My Designs</string>
+    <string name="dz_search">Search</string>
+    <string name="dz_all">All</string>
+    <string name="dz_fav">Favourites</string>
+    <string name="dz_imported">Imported</string>
+    <string name="dz_import">Import</string>
+    <string name="dz_empty">No designs yet</string>
+    <string name="dz_empty_body">Save one from Discover or import a file.</string>
+    <string name="dz_open">Edit</string>
+    <string name="dz_active">Use</string>
+    <string name="dz_dup">Duplicate</string>
+    <string name="dz_copy">copy</string>
+    <string name="dz_delete">Delete</string>
+    <string name="dz_deleted">Design deleted.</string>
+    <string name="dz_undo">Undo</string>
+    <string name="im_title">Import</string>
+    <string name="im_pick">Choose file</string>
+    <string name="im_body">Opens .wdesign, .mtz, ZIP files with images and .wdbackup. Files are checked before anything is saved.</string>
+    <string name="im_reading">Checking the file…</string>
+    <string name="im_ok">Import</string>
+    <string name="im_done">Imported: %1$s</string>
+    <string name="im_failed">This file cannot be imported: %1$s</string>
+    <string name="im_warnings">Skipped for safety: %1$d item(s)</string>
+</resources>
