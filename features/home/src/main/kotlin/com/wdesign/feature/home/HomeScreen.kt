@@ -1,5 +1,7 @@
 package com.wdesign.feature.home
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,10 +81,10 @@ private fun TwoColumnTools(go: (String) -> Unit) {
 @Composable
 fun HomeScreen(go: (String) -> Unit) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val store = WD.services.projects
     val starter = stringResource(R.string.hm_starter)
-    LaunchedEffect(Unit) {
+    SafeLaunchedEffect(Unit) {
         store.load()
         if (store.projects.value.isEmpty()) {
             // First launch: seed one editable design so every Home action works immediately.
@@ -174,7 +176,7 @@ fun HomeScreen(go: (String) -> Unit) {
 
 @Composable
 fun CreateScreen(go: (String) -> Unit) {
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val newName = stringResource(R.string.cr_new_name)
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).statusBarsPadding().padding(horizontal = 20.dp),

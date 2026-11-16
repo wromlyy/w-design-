@@ -49,7 +49,7 @@ jobs:
           fi
           echo "WD_KEYSTORE_PATH=$KS" >> "$GITHUB_ENV"
       - name: Tests + release build (MtzDemoTest writes core/mtz/build/demo.mtz)
-        run: ./gradlew --stacktrace :core:model:test :core:format:test :core:mtz:test assembleRelease
+        run: ./gradlew --stacktrace :core:model:test :core:format:test :core:mtz:test assembleRelease :app:assembleDebug :app:assembleDebugAndroidTest
       - name: Verify APK
         run: |
           cp app/build/outputs/apk/release/app-release.apk W-Design.apk
@@ -66,6 +66,8 @@ jobs:
             W-Design.apk
             signature.txt
             core/mtz/build/demo.mtz
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -78,7 +80,7 @@ jobs:
   smoke:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/download-artifact@v4
         with: { name: apk }
@@ -101,10 +103,20 @@ jobs:
             mkdir -p shots
             for s in home discover create designs settings studio-demo lockscreen-demo xiaomilab; do adb shell am start -W -a android.intent.action.VIEW -d "wdesign://open/$s" -p com.wdesign.studio; sleep 4; adb exec-out screencap -p > "shots/$s.png"; done
             adb shell dumpsys activity top | head -50 > shots/activity-top.txt
-            adb shell monkey -p com.wdesign.studio --throttle 150 -s 42 -v 800 > shots/monkey.txt 2>&1 || true
+            adb shell monkey -p com.wdesign.studio --pct-syskeys 0 --throttle 150 -s 42 -v 1500 > shots/monkey.txt 2>&1 || true
+            tail -5 shots/monkey.txt
             adb logcat -d > shots/logcat.txt
             for f in shots/*.png; do test -s "$f" || { echo "empty screenshot $f"; exit 1; }; done
-            if grep -A3 "FATAL EXCEPTION" shots/logcat.txt | grep -q "com.wdesign.studio"; then grep -A30 "FATAL EXCEPTION" shots/logcat.txt; exit 1; fi
+            if grep -A3 "FATAL EXCEPTION" shots/logcat.txt | grep -q "com.wdesign.studio"; then grep -A40 "FATAL EXCEPTION" shots/logcat.txt; exit 1; fi
+            adb uninstall com.wdesign.studio || true
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb logcat -c
+            adb shell am instrument -w -r com.wdesign.studio.test/androidx.test.runner.AndroidJUnitRunner > shots/instrument.txt 2>&1 || true
+            grep -E "INSTRUMENTATION_STATUS: (test|stack)=|OK \(|FAILURES|Process crashed|Tests run" shots/instrument.txt | tail -40
+            adb logcat -d > shots/logcat-instrument.txt
+            if grep -qE "FAILURES!!!|Process crashed|INSTRUMENTATION_FAILED" shots/instrument.txt; then grep -A40 "FATAL EXCEPTION" shots/logcat-instrument.txt | head -80; exit 1; fi
+            grep -q "^OK (" shots/instrument.txt || { echo "instrumentation did not report OK"; tail -30 shots/instrument.txt; exit 1; }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: screenshots, path: shots }

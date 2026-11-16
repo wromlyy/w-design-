@@ -8,7 +8,7 @@ Only what is listed as built exists in the code. Nothing is shown in the app bef
 | Stage | State |
 |---|---|
 | 0a Gradle skeleton (AGP 8.7.3, Gradle 8.11.1, Kotlin 2.0.21, version catalog) | done |
-| 0b Signing (keystore.properties / WD_* env, loud warning when absent) + CI workflow (build / emulator smoke + monkey / `[release]` publish) | written and hardened for CI; has not run yet because nothing is pushed |
+| 0b Signing (keystore.properties / WD_* env, loud warning when absent) + CI workflow (build / emulator smoke: screenshots, monkey 1500, tap-every-button instrumented test / `[release]` publish) | running on GitHub Actions. First run: build green, smoke red (Haze crash, now fixed) |
 | 1 Design system (Onest + JetBrains Mono, dark/light tokens, Haze 1.1.1 glass with fallback tint, own line icons, components) + app shell (5-tab glass bar, deep links, en + ru) | done |
 | 2 core/model | done + tests |
 | 3 core/format (.wdesign, safe ZIP limits, generic image ZIP, .wdbackup reader/writer) | done + tests |
@@ -27,8 +27,15 @@ Only what is listed as built exists in the code. Nothing is shown in the app bef
 
 Feature modules planned but not yet in `settings.gradle.kts`: editor-kit, theme-studio, create, importexport, launcher, widgets, livewallpaper.
 
+## Crash safety
+* Every click handler runs in `SafeScope` and every screen effect in `SafeLaunchedEffect`. Errors become a snackbar and are written to `CrashLog`; a real crash is still delegated to the system handler.
+* Settings shows the last error report (Share / Clear) when one exists.
+* CI runs `TapEverythingTest`, which taps every clickable element on 8 screens, plus monkey 1500 on the minified release APK.
+
 ## Verified facts used
 * Haze 1.1.1 (`haze-android-1.1.1-sources.jar`): `Modifier.haze(state)`, `Modifier.hazeChild(state, style, block)`, `HazeChildScope` vars
   `blurEnabled, alpha, style, mask, backgroundColor, tints, blurRadius, noiseFactor, fallbackTint, progressive`, `@ExperimentalHazeApi inputScale`;
   the shape overload is `@Deprecated`. `HazeDefaults.blurEnabled()` is true only on **API ≥ 32**, so `fallbackTint` is always set.
+  **`backgroundColor` is mandatory**: `HazeChildNode.kt:327` does `require(bg.isSpecified)` on every draw (resolved scope → style →
+  `LocalHazeStyle`). Leaving it unset crashed every screen with the glass bar in CI run 43866896015. `glass()` now sets the opaque surface colour.
 * MTZ / MAML facts and sources: see docs/MTZ.md.

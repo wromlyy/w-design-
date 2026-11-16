@@ -66,8 +66,12 @@ import dev.chrisbanes.haze.hazeChild
 
 /**
  * Glass for floating layers only (bars, sheets, toolbars). Verified Haze 1.1.1 API:
- * Modifier.hazeChild(state) { … } with HazeChildScope vars. HazeDefaults.blurEnabled() is true
- * only on API 32+, so below that (and with Reduce transparency) Haze draws [WColors.glassFallback].
+ * Modifier.hazeChild(state) { … } with HazeChildScope vars.
+ * - backgroundColor is MANDATORY in 1.1.1: HazeChildNode.kt:327 does
+ *   require(bg.isSpecified) on every draw, resolving scope → style → LocalHazeStyle. Leaving it
+ *   unset crashed every screen with the glass bar. It must be an opaque surface colour.
+ * - HazeDefaults.blurEnabled() is true only on API 32+, so below that (and with Reduce
+ *   transparency) Haze draws [WColors.glassFallback] instead of blurring.
  */
 fun Modifier.glass(shape: Shape): Modifier = composed {
     val t = LocalWTokens.current
@@ -76,6 +80,7 @@ fun Modifier.glass(shape: Shape): Modifier = composed {
     this
         .clip(shape)
         .hazeChild(state = state) {
+            backgroundColor = c.surface
             blurRadius = 24.dp
             tints = listOf(HazeTint(c.glassFill))
             noiseFactor = 0.08f

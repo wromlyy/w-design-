@@ -1,5 +1,8 @@
 package com.wdesign.feature.designs
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
+import com.wdesign.ds.launchSafely
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -67,9 +70,9 @@ private enum class Filter { ALL, FAV, IMPORTED }
 
 @Composable
 fun DesignsScreen(go: (String) -> Unit, snackbar: SnackbarHostState) {
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val store = WD.services.projects
-    LaunchedEffect(Unit) { store.load() }
+    SafeLaunchedEffect(Unit) { store.load() }
     val all by store.projects.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
     var filter by rememberSaveable { mutableStateOf(Filter.ALL) }
@@ -125,7 +128,7 @@ fun DesignsScreen(go: (String) -> Unit, snackbar: SnackbarHostState) {
 @Composable
 fun ImportScreen(go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostState) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     var reading by remember { mutableStateOf(false) }
     var previews by remember { mutableStateOf<List<ImportPreview>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -134,18 +137,18 @@ fun ImportScreen(go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostS
             reading = true; error = null; previews = emptyList()
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    val head = ctx.contentResolver.openInputStream(uri)!!.use { it.readHead(4) }
+                    val head = (ctx.contentResolver.openInputStream(uri) ?: error("Cannot open the file")).use { it.readHead(4) }
                     require(FileMagic.isZip(head)) { "not a ZIP archive" }
                     val name = uri.lastPathSegment.orEmpty().lowercase()
                     val staging = WD.services.stagingDir("import")
-                    ctx.contentResolver.openInputStream(uri)!!.use { input ->
+                    (ctx.contentResolver.openInputStream(uri) ?: error("Cannot open the file")).use { input ->
                         when {
                             name.endsWith(".mtz") -> listOf(MtzReader().inspect(input, staging).preview)
                             name.endsWith(".wdbackup") -> BackupReader().read(input, staging).projects
                             else -> {
                                 val p = WDesignReader().inspect(input, staging)
                                 // Unknown extension and not a W Design archive: try it as MTZ.
-                                if (!p.ok && p.manifest == null && !p.generic) ctx.contentResolver.openInputStream(uri)!!.use { listOf(MtzReader().inspect(it, WD.services.stagingDir("import-mtz")).preview) } else listOf(p)
+                                if (!p.ok && p.manifest == null && !p.generic) (ctx.contentResolver.openInputStream(uri) ?: error("Cannot open the file")).use { listOf(MtzReader().inspect(it, WD.services.stagingDir("import-mtz")).preview) } else listOf(p)
                             }
                         }
                     }
@@ -157,12 +160,12 @@ fun ImportScreen(go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostS
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) inspect(uri) }
     val pending by PendingImport.uri
-    LaunchedEffect(pending) { pending?.let { inspect(it); PendingImport.uri.value = null } }
+    SafeLaunchedEffect(pending) { pending?.let { inspect(it); PendingImport.uri.value = null } }
     Column(Modifier.fillMaxSize()) {
         WTopBar(stringResource(R.string.im_title), back, stringResource(com.wdesign.ds.R.string.ds_back))
         Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.im_body), style = W.type.body, color = W.colors.muted)
-            WButton(stringResource(R.string.im_pick), { picker.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) }, icon = WIcons.Folder, modifier = Modifier.fillMaxWidth())
+            WButton(stringResource(R.string.im_pick), { picker.launchSafely(arrayOf("application/zip", "application/octet-stream", "*/*"), scope) }, icon = WIcons.Folder, modifier = Modifier.fillMaxWidth())
             if (reading) { CircularProgressIndicator(color = W.colors.accent); Text(stringResource(R.string.im_reading), color = W.colors.muted) }
             error?.let { Text(stringResource(R.string.im_failed, it), color = W.colors.danger, style = W.type.body) }
             for (p in previews) {

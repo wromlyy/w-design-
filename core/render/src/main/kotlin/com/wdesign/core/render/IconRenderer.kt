@@ -97,11 +97,7 @@ object IconRenderer {
         val mask = maskPath(style.mask, sf, style.cornerPct, shadowInset)
         val p = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
         if (style.mask != IconMask.NONE) {
-            val bg = when {
-                style.glass -> ArgbColor.White.withAlpha(0.18f)
-                style.background != null -> style.background!!
-                else -> ArgbColor.Transparent
-            }
+            val bg = if (style.glass) ArgbColor.White.withAlpha(0.18f) else style.background ?: ArgbColor.Transparent
             if (style.shadow) p.setShadowLayer(sf * 0.035f, 0f, sf * 0.015f, 0x55000000)
             p.color = if (bg.alpha == 0) 0x01000000 else bg.int
             c.drawPath(mask, p)

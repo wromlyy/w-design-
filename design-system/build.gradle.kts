@@ -26,4 +26,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     api(project(":core:model"))
     api(project(":core:render"))
+    api(project(":core:data"))
+    implementation(libs.androidx.activity.compose)
 }

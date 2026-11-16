@@ -1,5 +1,8 @@
 package com.wdesign.feature.xiaomilab
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
+import com.wdesign.ds.launchSafely
 import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
@@ -74,9 +77,9 @@ private fun Field(label: String, value: String, onChange: (String) -> Unit) {
 @Composable
 fun MtzExportScreen(projectId: String?, go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostState) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val store = WD.services.projects
-    LaunchedEffect(Unit) { store.load() }
+    SafeLaunchedEffect(Unit) { store.load() }
     val projects by store.projects.collectAsState()
     val activeId by WD.services.settings.settings.collectAsState(initial = null)
     var selectedId by remember { mutableStateOf(projectId) }
@@ -97,7 +100,7 @@ fun MtzExportScreen(projectId: String?, go: (String) -> Unit, back: () -> Unit, 
     val pickReference = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
             val r = withContext(Dispatchers.IO) {
-                runCatching { ctx.contentResolver.openInputStream(uri)!!.use { MtzReader().inspect(it, WD.services.stagingDir("reference")) } }.getOrNull()
+                runCatching { (ctx.contentResolver.openInputStream(uri) ?: error("Cannot open the file")).use { MtzReader().inspect(it, WD.services.stagingDir("reference")) } }.getOrNull()
             }
             if (r == null || !r.preview.ok) { reference = null; snackbar.showSnackbar(refFailed) } else {
                 reference = r
@@ -148,7 +151,7 @@ fun MtzExportScreen(projectId: String?, go: (String) -> Unit, back: () -> Unit, 
 
                 SectionHeader(stringResource(R.string.mx_reference))
                 Text(stringResource(R.string.mx_reference_body), style = W.type.caption, color = W.colors.muted)
-                WButton(stringResource(R.string.mx_reference_pick), { pickReference.launch(arrayOf("*/*")) }, kind = WButtonKind.SECONDARY, icon = WIcons.Folder)
+                WButton(stringResource(R.string.mx_reference_pick), { pickReference.launchSafely(arrayOf("*/*"), scope) }, kind = WButtonKind.SECONDARY, icon = WIcons.Folder)
                 reference?.let { r ->
                     Text(stringResource(R.string.mx_reference_info, r.themeValues.size, r.themeValues.values.sumOf { it.size }, r.description?.uiVersion.orEmpty().ifBlank { "?" }), style = W.type.mono, color = W.colors.text)
                     WSwitchRow(stringResource(R.string.mx_tint), tintAccent, { tintAccent = it }, subtitle = stringResource(R.string.mx_tint_body, accentKeys.values.sumOf { it.size }))
@@ -209,11 +212,13 @@ fun MtzExportScreen(projectId: String?, go: (String) -> Unit, back: () -> Unit, 
                         Text(stringResource(R.string.mx_overrides, r.report.appliedOverrides.values.sumOf { it.size }, r.report.ignoredOverrides.values.sumOf { it.size }), style = W.type.caption, color = W.colors.muted)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        WButton(stringResource(R.string.mx_save), { save.launch(file?.name ?: "theme.mtz") }, icon = WIcons.Download, modifier = Modifier.weight(1f))
+                        WButton(stringResource(R.string.mx_save), { save.launchSafely(file?.name ?: "theme.mtz", scope) }, icon = WIcons.Download, modifier = Modifier.weight(1f))
                         WButton(stringResource(R.string.mx_open_themes), {
                             val f = file ?: return@WButton
-                            val uri = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f)
-                            if (!XiaomiIntents.openMtzInThemes(ctx, uri)) scope.launch { snackbar.showSnackbar(themesFailed) }
+                            scope.launch {
+                                val uri = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f)
+                                if (!XiaomiIntents.openMtzInThemes(ctx, uri)) snackbar.showSnackbar(themesFailed)
+                            }
                         }, kind = WButtonKind.SECONDARY, modifier = Modifier.weight(1f))
                     }
                     if (Build.VERSION.SDK_INT >= 29) {
@@ -227,8 +232,8 @@ fun MtzExportScreen(projectId: String?, go: (String) -> Unit, back: () -> Unit, 
                                             put(MediaStore.Downloads.MIME_TYPE, "application/octet-stream")
                                             put(MediaStore.Downloads.RELATIVE_PATH, "Download/W Design")
                                         }
-                                        val uri = ctx.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)!!
-                                        ctx.contentResolver.openOutputStream(uri)!!.use { out -> f.inputStream().use { it.copyTo(out) } }
+                                        val uri = ctx.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: error("Cannot create the file in Downloads")
+                                        (ctx.contentResolver.openOutputStream(uri) ?: error("Cannot write the file")).use { out -> f.inputStream().use { it.copyTo(out) } }
                                     }.isSuccess
                                 }
                                 snackbar.showSnackbar(if (ok) dlMsg else ctx.getString(com.wdesign.ds.R.string.ds_error_generic, "MediaStore"))

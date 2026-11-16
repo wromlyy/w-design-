@@ -13,6 +13,7 @@ import com.wdesign.core.model.DeviceSnapshot
 import com.wdesign.core.render.MtzExporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -34,7 +35,11 @@ class SettingsStore(private val context: Context) {
         val active = stringPreferencesKey("active_project")
     }
 
-    val settings: Flow<AppSettings> = context.wdSettings.data.map { p ->
+    // A corrupted preferences file must never crash the app: fall back to defaults.
+    val settings: Flow<AppSettings> = context.wdSettings.data.catch { e ->
+        CrashLog.record(e)
+        emit(androidx.datastore.preferences.core.emptyPreferences())
+    }.map { p ->
         AppSettings(
             themeMode = p[K.mode]?.let { runCatching { AppearanceMode.valueOf(it) }.getOrNull() } ?: AppearanceMode.DARK,
             reduceMotion = p[K.motion] ?: false,
@@ -59,8 +64,8 @@ class Services(val context: Context) {
 
     @Volatile private var cachedSnapshot: DeviceSnapshot? = null
     suspend fun snapshot(refresh: Boolean = false): DeviceSnapshot = withContext(Dispatchers.IO) {
-        if (refresh || cachedSnapshot == null) cachedSnapshot = device.snapshot()
-        cachedSnapshot!!
+        val cached = cachedSnapshot
+        if (!refresh && cached != null) cached else device.snapshot().also { cachedSnapshot = it }
     }
 
     /** Scratch folder for import staging and exports shared through FileProvider (cache/exports). */

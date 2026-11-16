@@ -1,5 +1,8 @@
 package com.wdesign.feature.xiaomilab
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
+import com.wdesign.ds.launchSafely
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,7 +72,7 @@ fun runHowTo(context: Context, howTo: HowTo, go: (String) -> Unit): Boolean = wh
 @Composable
 fun rememberSnapshot(): DeviceSnapshot? {
     var snap by remember { mutableStateOf<DeviceSnapshot?>(null) }
-    LaunchedEffect(Unit) { snap = WD.services.snapshot() }
+    SafeLaunchedEffect(Unit) { snap = WD.services.snapshot() }
     return snap
 }
 
@@ -99,7 +102,7 @@ fun FeatureRow(f: FeatureSupport, go: (String) -> Unit, onFailed: () -> Unit) {
 fun XiaomiLabScreen(go: (String) -> Unit, back: () -> Unit, snackbar: androidx.compose.material3.SnackbarHostState? = null) {
     val ctx = LocalContext.current
     val snap = rememberSnapshot()
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val failed = stringResource(R.string.xl_open_failed)
     val onFailed: () -> Unit = { scope.launch { snackbar?.showSnackbar(failed) } }
     var probe by remember { mutableStateOf<ByteArray?>(null) }
@@ -143,7 +146,7 @@ fun XiaomiLabScreen(go: (String) -> Unit, back: () -> Unit, snackbar: androidx.c
                         val s = WD.services.snapshot()
                         probe = withContext(Dispatchers.Default) { runCatching { WD.services.mtz.probe(s.screenWidthPx, s.screenHeightPx).bytes }.getOrNull() }
                         probing = false
-                        if (probe != null) saveProbe.launch("wdesign-probe.mtz")
+                        if (probe != null) saveProbe.launchSafely("wdesign-probe.mtz", scope)
                     }
                 })
             }

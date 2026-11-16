@@ -102,8 +102,9 @@ object LockScreenRenderer {
         val baseline = top - fm.ascent * 0.86f
         val width = p.measureText(text)
         val left = when (p.textAlign) { Paint.Align.LEFT -> x; Paint.Align.CENTER -> x - width / 2; else -> x - width }
-        if (!clock.gradient.isNullOrEmpty() && clock.render != ClockRender.DOT_MATRIX) {
-            val cols = clock.gradient!!.map { it.int }.let { if (it.size == 1) it + it else it }
+        val gradient = clock.gradient
+        if (!gradient.isNullOrEmpty() && clock.render != ClockRender.DOT_MATRIX) {
+            val cols = gradient.map { it.int }.let { if (it.size == 1) it + it else it }
             p.shader = LinearGradient(left, top, left + width, baseline, cols.toIntArray(), null, Shader.TileMode.CLAMP)
         }
         if (clock.render == ClockRender.DOT_MATRIX) {

@@ -22,6 +22,8 @@ object XiaomiIntents {
                 return true
             } catch (_: ActivityNotFoundException) {
             } catch (_: SecurityException) {
+            } catch (_: RuntimeException) {
+                // e.g. FileUriExposedException or a vendor ROM refusing the intent: try the next fallback
             }
         }
         return false

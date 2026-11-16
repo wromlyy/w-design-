@@ -1,5 +1,7 @@
 package com.wdesign.feature.lockscreen
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
 import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
@@ -138,7 +140,7 @@ fun LockScreenStudio(projectId: String?, go: (String) -> Unit, back: () -> Unit,
     val newName = stringResource(R.string.ls_new_name)
     var project by remember { mutableStateOf<DesignProject?>(null) }
 
-    LaunchedEffect(projectId) {
+    SafeLaunchedEffect(projectId) {
         store.load()
         val active = runCatching { WD.services.settings.settings.first() }.getOrNull()?.activeProjectId
         project = projectId?.let(store::get) ?: active?.let(store::get) ?: store.projects.value.firstOrNull()
@@ -155,7 +157,7 @@ fun LockScreenStudio(projectId: String?, go: (String) -> Unit, back: () -> Unit,
 @Composable
 private fun StudioContent(initial: DesignProject, go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostState) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val store = WD.services.projects
     val history = remember(initial.id) { HistoryStack(initial.spec) }
     var spec by remember(initial.id) { mutableStateOf(initial.spec) }
@@ -171,12 +173,12 @@ private fun StudioContent(initial: DesignProject, go: (String) -> Unit, back: ()
     fun edit(f: (ThemeSpec) -> ThemeSpec) { val n = f(spec); history.push(n); spec = n; version++ }
 
     // Ticking clock for the preview.
-    LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1000L - now % 1000L) } }
+    SafeLaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1000L - now % 1000L) } }
     // Autosave 1.5 s after the last edit.
-    LaunchedEffect(version) { if (version > 0) { delay(1500); store.save(initial.copy(spec = spec, name = store.get(initial.id)?.name ?: initial.name)) } }
+    SafeLaunchedEffect(version) { if (version > 0) { delay(1500); store.save(initial.copy(spec = spec, name = store.get(initial.id)?.name ?: initial.name)) } }
 
     var screen by remember { mutableStateOf(1080 to 2400) }
-    LaunchedEffect(Unit) { val s = WD.services.snapshot(); screen = s.screenWidthPx to s.screenHeightPx }
+    SafeLaunchedEffect(Unit) { val s = WD.services.snapshot(); screen = s.screenWidthPx to s.screenHeightPx }
     val pw = 540; val ph = (pw.toFloat() * screen.second / screen.first).roundToInt()
     val minute = now / 60_000
     val assets = store.assetsDir(initial.id)
@@ -241,8 +243,8 @@ private fun StudioContent(initial: DesignProject, go: (String) -> Unit, back: ()
                                                 put(MediaStore.Images.Media.MIME_TYPE, "image/png")
                                                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/W Design")
                                             }
-                                            val uri = ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)!!
-                                            ctx.contentResolver.openOutputStream(uri)!!.use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+                                            val uri = ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: error("Cannot create the image in Pictures")
+                                            (ctx.contentResolver.openOutputStream(uri) ?: error("Cannot write the image")).use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
                                         }.isSuccess
                                     }
                                     busy = false
@@ -385,7 +387,7 @@ private fun ApplyPart(title: String, body: String, status: SupportStatus, badge:
 private fun ApplyPanel(spec: ThemeSpec, busy: Boolean, go: (String) -> Unit, projectId: String, onApply: () -> Unit, onReference: () -> Unit) {
     val ctx = LocalContext.current
     var xiaomi by remember { mutableStateOf<Boolean?>(null) }
-    LaunchedEffect(Unit) { xiaomi = WD.services.snapshot().isXiaomiFamily }
+    SafeLaunchedEffect(Unit) { xiaomi = WD.services.snapshot().isXiaomiFamily }
     val c = spec.lockScreen.clock
     Text(stringResource(R.string.ls_apply_intro), style = W.type.body, color = W.colors.text)
     ApplyPart(stringResource(R.string.ls_part_wall), stringResource(R.string.ls_part_wall_body), SupportStatus.SUPPORTED, stringResource(R.string.ls_badge_app)) {

@@ -1,5 +1,18 @@
 package com.wdesign.feature.settings
 
+import android.content.Intent
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
+import com.wdesign.core.data.CrashLog
+import com.wdesign.ds.WButton
+import com.wdesign.ds.WButtonKind
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(go: (String) -> Unit, snackbar: SnackbarHostState) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val store = WD.services.settings
     val s by store.settings.collectAsState(initial = AppSettings())
     val labels = mapOf(
@@ -59,10 +72,47 @@ fun SettingsScreen(go: (String) -> Unit, snackbar: SnackbarHostState) {
             }
         })
         ToolRow(stringResource(R.string.st_lab), "", WIcons.Cpu, { go(Routes.XIAOMI_LAB) })
+        CrashReportRow(snackbar)
         SectionHeader(stringResource(R.string.st_licences))
         WCard(Modifier.fillMaxWidth()) { Text(stringResource(R.string.st_licences_body), style = W.type.caption, color = W.colors.muted) }
         SectionHeader(stringResource(R.string.st_about))
         WCard(Modifier.fillMaxWidth()) { Text(stringResource(R.string.st_about_body), style = W.type.caption, color = W.colors.muted) }
         Spacer(Modifier.height(110.dp))
+    }
+}
+
+/** Shown only when CrashLog has a stored report. Share uses FileProvider (text/plain). */
+@Composable
+private fun CrashReportRow(snackbar: SnackbarHostState) {
+    val ctx = LocalContext.current
+    val scope = rememberSafeScope()
+    var report by remember { mutableStateOf<String?>(null) }
+    SafeLaunchedEffect(Unit) { report = withContext(Dispatchers.IO) { CrashLog.read(ctx) } }
+    val text = report ?: return
+    val cleared = stringResource(R.string.st_crash_cleared)
+    WCard(Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.st_crash), style = W.type.label, color = W.colors.text)
+            Text(stringResource(R.string.st_crash_body), style = W.type.caption, color = W.colors.muted)
+            Text(text.lineSequence().take(4).joinToString("\n"), style = W.type.mono, color = W.colors.muted, maxLines = 4)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                WButton(stringResource(R.string.st_crash_share), {
+                    scope.run {
+                        val uri = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", CrashLog.file(ctx))
+                        val send = Intent(Intent.ACTION_SEND).setType("text/plain")
+                            .putExtra(Intent.EXTRA_STREAM, uri).putExtra(Intent.EXTRA_TEXT, text.take(8000))
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        ctx.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }
+                }, kind = WButtonKind.SECONDARY, icon = WIcons.Share, modifier = Modifier.weight(1f))
+                WButton(stringResource(R.string.st_crash_clear), {
+                    scope.launch {
+                        withContext(Dispatchers.IO) { CrashLog.clear(ctx) }
+                        report = null
+                        snackbar.showSnackbar(cleared)
+                    }
+                }, kind = WButtonKind.GHOST, icon = WIcons.Trash, modifier = Modifier.weight(1f))
+            }
+        }
     }
 }

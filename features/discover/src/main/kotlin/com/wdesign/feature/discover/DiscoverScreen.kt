@@ -1,5 +1,7 @@
 package com.wdesign.feature.discover
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -94,7 +96,7 @@ fun DiscoverScreen(go: (String) -> Unit) {
 @Composable
 fun PresetDetailScreen(id: String, go: (String) -> Unit, back: () -> Unit, snackbar: SnackbarHostState) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberSafeScope()
     val preset = BuiltInPresets.byId(id)
     var busy by remember { mutableStateOf(false) }
     var savedId by remember { mutableStateOf<String?>(null) }

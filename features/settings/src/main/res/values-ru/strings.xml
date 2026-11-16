@@ -14,4 +14,9 @@
     <string name="st_licences_body">Onest и JetBrains Mono (SIL OFL 1.1), Haze (Apache 2.0), AndroidX и Kotlin (Apache 2.0). Иконки нарисованы для W Design.</string>
     <string name="st_about">О приложении</string>
     <string name="st_about_body">W Design 1.0.0. Работает без сети. Пакеты MTZ неофициальные, не проверены и не подписаны Xiaomi.</string>
+    <string name="st_crash">Последний отчёт об ошибке</string>
+    <string name="st_crash_body">Сохраняется, когда что-то пошло не так. Отправьте его разработчику, чтобы помочь исправить.</string>
+    <string name="st_crash_share">Отправить отчёт</string>
+    <string name="st_crash_clear">Очистить</string>
+    <string name="st_crash_cleared">Отчёт удалён.</string>
 </resources>

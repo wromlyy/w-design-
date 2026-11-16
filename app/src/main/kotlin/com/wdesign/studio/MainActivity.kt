@@ -1,5 +1,7 @@
 package com.wdesign.studio
 
+import com.wdesign.ds.SafeLaunchedEffect
+import com.wdesign.ds.rememberSafeScope
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
@@ -37,12 +39,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.wdesign.core.data.AppSettings
+import com.wdesign.core.data.CrashLog
 import com.wdesign.core.data.WD
 import com.wdesign.core.model.DesignLink
 import com.wdesign.core.model.DesignSource
 import com.wdesign.ds.BarItem
 import com.wdesign.ds.GlassBottomBar
 import com.wdesign.ds.LocalHazeState
+import com.wdesign.ds.LocalSnackbar
 import com.wdesign.ds.Routes
 import com.wdesign.ds.W
 import com.wdesign.ds.WIcons
@@ -64,6 +68,7 @@ import dev.chrisbanes.haze.haze
 class WDesignApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        CrashLog.install(this) // writes filesDir/crash/last.txt, then delegates to the system handler
         WD.init(this) // lazy services only; no I/O here
     }
 }
@@ -105,8 +110,8 @@ private fun AppShell(intent: Intent?, consumed: () -> Unit) {
     val linkOpened = stringResource(R.string.link_imported)
     val rise = with(LocalDensity.current) { 16.dp.roundToPx() }
 
-    LaunchedEffect(intent) {
-        val i = intent ?: return@LaunchedEffect
+    SafeLaunchedEffect(intent) {
+        val i = intent ?: return@SafeLaunchedEffect
         handleIntent(i, nav,
             onLink = { link ->
                 val decoded = DesignLink.decode(link)
@@ -130,7 +135,7 @@ private fun AppShell(intent: Intent?, consumed: () -> Unit) {
     val go: (String) -> Unit = { route -> nav.navigate(route) { launchSingleTop = true } }
     val back: () -> Unit = { if (!nav.popBackStack()) go(Routes.HOME) }
 
-    CompositionLocalProvider(LocalHazeState provides hazeState) {
+    CompositionLocalProvider(LocalHazeState provides hazeState, LocalSnackbar provides snackbar) {
         Box(Modifier.fillMaxSize().background(W.colors.surface)) {
             NavHost(
                 nav, startDestination = Routes.HOME,

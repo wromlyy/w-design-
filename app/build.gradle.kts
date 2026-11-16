@@ -50,6 +50,7 @@ android {
         versionName = "1.0.0"
         // The app ships English and Russian only; drop library translations for other languages.
         resourceConfigurations += listOf("en", "ru")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -107,4 +108,13 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.haze)
+
+    // Emulator test that taps every button on every screen (run by the CI smoke job).
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.espresso.intents)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
